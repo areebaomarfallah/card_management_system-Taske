@@ -1,5 +1,8 @@
 package com.card_management_system.card_management_system.controller;
 
+import com.card_management_system.card_management_system.dto.AccountRequestDTO;
+import com.card_management_system.card_management_system.dto.AccountResponseDTO;
+import com.card_management_system.card_management_system.enume.Status_type;
 import com.card_management_system.card_management_system.model.Account;
 import com.card_management_system.card_management_system.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,21 +19,38 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+    public ResponseEntity<AccountResponseDTO> createAccount(@RequestBody AccountRequestDTO dto) {
+        Account account = mapToEntity(dto);
         Account savedAccount = accountService.createAccount(account);
-        return ResponseEntity.status(201).body(savedAccount);
+        return ResponseEntity.status(201).body(mapToResponseDTO(savedAccount));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Account> updateAccount(@PathVariable UUID id, @RequestBody Account account) {
+    public ResponseEntity<AccountResponseDTO> updateAccount(@PathVariable UUID id, @RequestBody AccountRequestDTO dto) {
+        Account account = mapToEntity(dto);
         account.setId(id);
         Account updatedAccount = accountService.updateAccount(account);
-        return ResponseEntity.ok(updatedAccount);
+        return ResponseEntity.ok(mapToResponseDTO(updatedAccount));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccount(@PathVariable UUID id) {
+    public ResponseEntity<AccountResponseDTO> getAccount(@PathVariable UUID id) {
         Account account = accountService.getAccount(id);
-        return ResponseEntity.ok(account);
+        return ResponseEntity.ok(mapToResponseDTO(account));
+    }
+
+    private AccountResponseDTO mapToResponseDTO(Account account) {
+        AccountResponseDTO dto = new AccountResponseDTO();
+        dto.setId(account.getId());
+        dto.setStatus(account.getStatus().name());
+        dto.setBalance(account.getBalance());
+        return dto;
+    }
+
+    private Account mapToEntity(AccountRequestDTO dto) {
+        Account account = new Account();
+        account.setStatus(Status_type.valueOf(dto.getStatus()));
+        account.setBalance(dto.getBalance());
+        return account;
     }
 }

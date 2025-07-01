@@ -1,21 +1,26 @@
 package com.card_management_system.card_management_system.model;
 
+import com.card_management_system.card_management_system.enume.Status_type;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "account")
 public class Account {
+
     @Id
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue
+    private UUID id;
 
+    @Enumerated(EnumType.STRING)
+    private Status_type status;
 
-    @Column(nullable = false)
-    private String status; // ACTIVE or INACTIVE
+    private BigDecimal balance;
 
-    @Column(nullable = false)
-    private BigDecimal balance = BigDecimal.ZERO;
+    @OneToMany(mappedBy = "account")
+    private List<Card> cards;
 }

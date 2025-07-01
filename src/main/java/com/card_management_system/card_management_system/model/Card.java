@@ -1,24 +1,26 @@
 package com.card_management_system.card_management_system.model;
 
+import com.card_management_system.card_management_system.enume.Status_type;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "card")
 public class Card {
+
     @Id
-    private UUID id = UUID.randomUUID();
+    @GeneratedValue
+    private UUID id;
 
-
-    @Column(nullable = false)
-    private String status; // ACTIVE or INACTIVE
-
-    @Column(nullable = false)
+    private String cardNumber;
     private LocalDate expiry;
 
-    @Column(nullable = false, unique = true)
-    private String cardNumber;
+    @Enumerated(EnumType.STRING)
+    private Status_type status;
+
+    @ManyToOne
+    private Account account;
 }

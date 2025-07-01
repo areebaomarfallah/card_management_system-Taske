@@ -1,26 +1,42 @@
 package com.card_management_system.card_management_system;
 
-import java.security.MessageDigest;
-import java.util.Base64;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+
+import java.security.SecureRandom;
 
 public class HashUtil {
+    private static final int BCRYPT_STRENGTH = 12;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    /**
-     * Generates a SHA-256 hash of the given input string.
-     *
-     * @param data The input string to hash.
-     * @return A Base64-encoded SHA-256 hash.
-     * @throws Exception If hashing fails.
-     */
-    public static String hash(String data) throws Exception {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(data.getBytes("UTF-8"));
-        return Base64.getEncoder().encodeToString(hash);
+    public static String hashCardNumber(String cardNumber) {
+        if (cardNumber == null || cardNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Card number cannot be null or empty");
+        }
+        return BCrypt.hashpw(cardNumber, BCrypt.gensalt(BCRYPT_STRENGTH, SECURE_RANDOM));
     }
 
+    public static boolean verifyCardNumber(String cardNumber, String hashedCardNumber) {
+        return cardNumber != null &&
+                hashedCardNumber != null &&
+                BCrypt.checkpw(cardNumber, hashedCardNumber);
+    }
 
-    public static boolean verifyHash(String data, String expectedHash) throws Exception {
-        String actualHash = hash(data);
-        return actualHash.equals(expectedHash);
+    public static boolean isValidCardNumberFormat(String cardNumber) {
+        if (cardNumber == null || cardNumber.length() < 13 || cardNumber.length() > 19) {
+            return false;
+        }
+
+        int sum = 0;
+        boolean alternate = false;
+        for (int i = cardNumber.length() - 1; i >= 0; i--) {
+            int n = Integer.parseInt(cardNumber.substring(i, i + 1));
+            if (alternate) {
+                n *= 2;
+                if (n > 9) n = (n % 10) + 1;
+            }
+            sum += n;
+            alternate = !alternate;
+        }
+        return (sum % 10 == 0);
     }
 }
